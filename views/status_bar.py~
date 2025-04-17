@@ -1,0 +1,80 @@
+from rich.console import RenderableType
+from rich.text import Text
+from textual.widget import Widget
+from textual.containers import Container
+
+
+class StatusBar(Widget):
+    """Status bar widget for displaying notifications."""
+
+    DEFAULT_CSS = """
+    StatusBar {
+        dock: bottom;
+        height: 1;
+        width: 100%;
+        background: $surface;
+        color: $text;
+    }
+    
+    StatusBar.notification {
+        background: $success;
+        color: $text;
+    }
+    """
+
+    def __init__(self, name: str = None) -> None:
+        super().__init__(name=name)
+        self.message = None
+
+    def update_message(self, message: str) -> None:
+        """
+        Update the status message.
+
+        Args:
+            message: Message to display
+        """
+        self.message = message
+        self.add_class("notification")
+        self.refresh()
+
+    def clear_message(self) -> None:
+        """Clear the status message."""
+        self.message = None
+        self.remove_class("notification")
+        self.refresh()
+
+    def render(self) -> RenderableType:
+        """
+        Render the status bar.
+
+        Returns:
+            Rich renderable
+        """
+        if self.message:
+            return Text(f" ⚠ {self.message} ⚠ ", style="bold")
+
+        # Show key bindings when no message is displayed with sci-fi styling
+        keys = [
+            ("j/k", "Navigate"),
+            ("t", "Toggle Folder"),  # Changed from Tab to t to match bindings
+            ("Enter", "Toggle Include"),
+            ("w", "Write .claudeignore"),
+            ("o", "Expand All"),
+            ("p", "Collapse All"),
+            ("q", "Quit")
+        ]
+
+        help_text = Text(" ")
+        for key, description in keys:
+            # Sci-fi cyan for key names
+            help_text.append(f"[{key}]", style="bold #58ffd6")
+            # Light blue for descriptions
+            help_text.append(f" {description} ", style="#8ecdf7")
+            # Darker blue for separators
+            help_text.append(" • ", style="#173a6c")
+
+        # Remove the last separator
+        if help_text.plain.endswith(" • "):
+            help_text = Text(help_text.plain[:-3], style=help_text.style)
+
+        return help_text

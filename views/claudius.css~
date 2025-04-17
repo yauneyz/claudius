@@ -1,0 +1,130 @@
+/* Claudius - Sci-Fi Aesthetic
+   Inspired by Tron, Minority Report, and Iron Man interfaces */
+
+/* Main app styles */
+Screen {
+    background: #0a1121;
+    color: #e0f2ff;
+}
+
+#main {
+    width: 1fr;
+    height: 1fr;
+    border-top: solid #173a6c;
+    border-bottom: solid #173a6c;
+    padding: 1;
+}
+
+/* File tree styling */
+FileTree {
+    width: 1fr;
+    height: 1fr;
+    overflow: auto;
+    background: #0a1121;
+    border: solid #173a6c;
+    padding: 1;
+}
+
+/* Tree item & file styling */
+.tree-item {
+    color: #8ecdf7;
+    padding: 0 1;
+}
+
+.folder-icon {
+    color: #4db1ff;
+    text-style: bold;
+}
+
+.file-icon {
+    color: #64c3f7;
+}
+
+/* Status bar styling */
+StatusBar {
+    dock: bottom;
+    height: 1;
+    background: #173a6c;
+    color: #e0f2ff;
+    padding: 0 1;
+    border-top: hkey #214e8a;
+}
+
+StatusBar.notification {
+    background: #00579c;
+    color: #e0f2ff;
+    text-style: bold;
+}
+
+/* Item styling for included files */
+.included {
+    color: #58ffd6;
+    text-style: bold;
+    background: #10314d5f;
+}
+
+/* Item styling for selected items - made more prominent */
+.selected {
+    background: yellow;
+    color: red;
+    border: tall #00c6ff;
+    text-style: bold italic;
+}
+
+/* Header styling */
+Header {
+    background: #00294a;
+    color: #e0f2ff;
+    border-bottom: hkey #214e8a;
+}
+
+/* Footer styling */
+Footer {
+    background: #00294a;
+    color: #8ecdf7;
+    border-top: solid #173a6c;
+}
+
+/* Custom styles for expanded folders */
+.expanded-folder {
+    color: #4db1ff;
+    text-style: bold;
+}
+
+/* Keyline styling (creates tech grid effect) */
+.keyline {
+    border-bottom: solid #173a6c;
+}
+
+/* Make scrollbars look futuristic */
+ScrollBar {
+    background: #0a1121;
+    color: #00579c;
+    scrollbar-corner-color: #0a1121;
+}
+
+ScrollBar > .thumb {
+    color: #4db1ff;
+}
+
+ScrollBar:hover > .thumb {
+    color: #58ffd6;
+}
+
+/* Glow effects */
+.glow-accent {
+    border: outer #00c6ff;
+    background: #00406c3d;
+}
+
+.glow-success {
+    border: outer #00ffc8;
+    background: #00aa8c3d;
+}
+
+/* Make notifications pop with a subtle glow effect */
+StatusBar.notification {
+    border: outer #00c6ff;
+    background: #00579c;
+    color: #ffffff;
+}

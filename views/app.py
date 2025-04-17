@@ -1,0 +1,180 @@
+"""
+Main application class for Claudius.
+Handles the app lifecycle and user input.
+"""
+import os
+import asyncio
+from textual.app import App, ComposeResult
+from textual.widgets import Header, Footer
+from textual.containers import Container
+from textual import on
+
+from ..models.state import AppState, reducer, ActionType, get_initial_state
+from ..models.file_system import scan_filesystem, read_claudeignore, write_claudeignore
+from ..models.persistence import save_state, load_state
+from ..utils.calculations import get_visible_items
+from .file_tree import FileTree
+from .status_bar import StatusBar
+
+
+class ClaudiusApp(App):
+    """Textual app for managing .claudeignore files."""
+
+    ENABLE_DEVTOOLS = True
+
+    CSS_PATH = "claudius.css"
+
+    BINDINGS = [
+        ("j", "move_down", "Move Down"),
+        ("k", "move_up", "Move Up"),
+        ("f", "toggle_folder", "Toggle Folder"),
+        ("i", "toggle_include", "Toggle Include"),
+        ("w", "write_file", "Write .claudeignore"),
+        ("o", "expand_all", "Expand All"),
+        ("p", "collapse_all", "Collapse All"),
+        ("q", "quit", "Quit"),
+    ]
+
+    def __init__(self):
+        super().__init__()
+        self.state = get_initial_state()
+        self.root_dir = os.getcwd()
+
+    def compose(self) -> ComposeResult:
+        """Compose the app with widgets."""
+        yield Header(show_clock=False)
+
+        with Container(id="main"):
+            yield FileTree()
+
+        yield StatusBar()
+        yield Footer()
+
+    def on_mount(self) -> None:
+        """Handle app mounting event."""
+        self.load_data()
+
+    def load_data(self) -> None:
+        """Load initial data from filesystem and .claudeignore file."""
+        try:
+            edges, folders = scan_filesystem(self.root_dir)
+            included_paths = read_claudeignore(self.root_dir)
+
+            # Load saved state
+            saved_state = load_state()
+            expanded_folders = saved_state['expanded_folders']
+
+            # Filter out any folders that don't exist anymore
+            valid_expanded_folders = {
+                folder for folder in expanded_folders if folder in folders}
+
+            # Get selected item, defaulting to first item if saved one doesn't exist
+            selected_item = saved_state['selected_item']
+            if selected_item not in edges.get('', []) and selected_item not in folders:
+                selected_item = next(iter(edges.get('', [])), None)
+
+            self.dispatch(ActionType.LOAD_DATA, {
+                "edges": edges,
+                "folders": folders,
+                "included_paths": included_paths,
+                "selected_item": selected_item,
+                "expanded_folders": valid_expanded_folders
+            })
+        except Exception as e:
+            self.dispatch(ActionType.SET_NOTIFICATION, {
+                          "message": f"Error loading data: {e}"})
+
+    def dispatch(self, action_type: str, payload: dict = None) -> None:
+        """
+        Dispatch an action to update state.
+
+        Args:
+            action_type: Type of action to dispatch
+            payload: Action payload
+        """
+        action = {"type": action_type, **(payload or {})}
+        new_state = reducer(self.state, action)
+        self.state = new_state
+
+        # Update UI based on new state
+        self.update_ui()
+
+        # Save state for certain actions
+        if action_type in [
+            ActionType.TOGGLE_EXPAND,
+            ActionType.EXPAND_ALL,
+            ActionType.COLLAPSE_ALL,
+            ActionType.MOVE_SELECTION
+        ]:
+            self.save_state()
+
+    def update_ui(self) -> None:
+        """Update UI components based on current state."""
+        file_tree = self.query_one(FileTree)
+        file_tree.update_from_state(self.state)
+
+        status_bar = self.query_one(StatusBar)
+        if self.state.notification:
+            status_bar.update_message(self.state.notification)
+        else:
+            status_bar.clear_message()
+
+    def save_state(self) -> None:
+        """Save current state to persistent storage."""
+        save_state(
+            expanded_folders=self.state.expanded_folders,
+            selected_item=self.state.selected_item
+        )
+
+    def action_move_down(self) -> None:
+        """Move selection down one item."""
+        self.dispatch(ActionType.MOVE_SELECTION, {"direction": "down"})
+
+    def action_move_up(self) -> None:
+        """Move selection up one item."""
+        self.dispatch(ActionType.MOVE_SELECTION, {"direction": "up"})
+
+    def action_toggle_folder(self) -> None:
+        """Toggle expansion of selected folder."""
+        if self.state.selected_item in self.state.folders:
+            self.dispatch(ActionType.TOGGLE_EXPAND, {
+                          "path": self.state.selected_item})
+
+    def action_toggle_include(self) -> None:
+        """Toggle selection of current item."""
+        self.dispatch(ActionType.TOGGLE_INCLUDE, {
+                      "path": self.state.selected_item})
+
+    def action_expand_all(self) -> None:
+        """Expand all folders."""
+        self.dispatch(ActionType.EXPAND_ALL)
+
+    def action_collapse_all(self) -> None:
+        """Collapse all folders."""
+        self.dispatch(ActionType.COLLAPSE_ALL)
+
+    def action_write_file(self) -> None:
+        """Write included paths to .claudeignore file."""
+        self.write_ignore_file()
+
+    def write_ignore_file(self) -> None:
+        """Write included paths to .claudeignore file."""
+        success = write_claudeignore(self.root_dir, self.state.included_paths)
+
+        if success:
+            self.dispatch(ActionType.SET_NOTIFICATION, {
+                          "message": "Saved to .claudeignore"})
+        else:
+            self.dispatch(ActionType.SET_NOTIFICATION, {
+                          "message": "Error saving .claudeignore"})
+
+        # Schedule notification clearing after 1 second
+        def clear_notification():
+            self.dispatch(ActionType.CLEAR_NOTIFICATION)
+
+        self.set_timer(1, clear_notification)
+
+    def on_unmount(self) -> None:
+        """Handle app unmounting event."""
+        # Save state when the app is closed
+        self.save_state()

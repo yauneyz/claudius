@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html><link type="text/css" id="dark-mode" rel="stylesheet" href="tutorial.html"><style type="text/css" id="dark-mode-custom-style"></style><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="tutorial_data/xterm.css">
+
+    <link rel="stylesheet" href="tutorial_data/css.css">
+    <script src="tutorial_data/textual.js"></script><style>h1{color:#fff;background-color:#000}body{margin:0;padding:0}.textual-terminal{width:100vw;height:100vh}</style>
+    <style>
+      body {
+        background: #0c181f;
+      }
+
+      .dialog-container {
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        box-shadow: var(--shadow-elevation-high);
+      }
+      .shade {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: #0c181f;
+        background-image: url("/static/images/background.png");
+      }
+      .intro {
+        width: 640px;
+        height: 240px;
+        font-size: 16px;
+        z-index: 20;
+        font-family: "Roboto Mono", menlo, monospace;
+        text-align: center;
+        opacity: 1;
+        color: rgba(255, 255, 255, 0.95);
+        background-color: #12232d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 32px;
+      }
+
+      body.-first-byte .intro-dialog,
+      body.-first-byte .intro-dialog .shade {
+        opacity: 0;
+        transition: opacity 0.3s ease-out;
+        display: none;
+      }
+
+      body .textual-terminal {
+        opacity: 0;
+        transition: opacity 0.3s ease-out;
+      }
+
+      body.-first-byte .textual-terminal {
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+      }
+
+      .intro svg {
+        padding-right: 16px;
+      }
+
+      body Button {
+        padding: 16px 32px;
+        background-color: #5e0ba7;
+        color: rgba(255, 255, 255, 0.95);
+        border: none;
+        font-family: "Roboto Mono", menlo, monospace;
+        margin: 16px;
+        display: block;
+      }
+
+      Button:hover {
+        background: #ac5af4;
+        cursor: pointer;
+      }
+
+      .closed-dialog {
+        opacity: 0;
+        display: none;
+      }
+
+      body.-closed .closed-dialog {
+        opacity: 1;
+        display: flex;
+      }
+
+      #start {
+        display: none;
+      }
+
+      #start.-delay {
+        display: flex;
+      }
+    </style>
+    <script>
+      function getStartUrl() {
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        params.delete("delay");
+        return url.pathname + "?" + params.toString();
+      }
+      async function refresh() {
+        const ping_url = document.body.dataset.pingurl;
+        if (ping_url) {
+          await fetch(ping_url, {
+            method: "GET",
+            mode: "no-cors",
+          });
+        }
+        window.location.href = getStartUrl();
+      }
+    </script>
+  </head>
+  <body data-pingurl="https://textual-web-demos.fly.dev/health-check/">
+    <div class="dialog-container intro-dialog">
+      <div class="shade"></div>
+      <div class="intro">
+        <svg width="32px" viewBox="0 0 2933 2261" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M2927.81 0H1677.1L1312.35 205.173H306.689L0.359375 434.921L204.029 893.177H735.972L644.784 2261H1060.36L1441.72 1974.97L2073.92 688.003H2334.4L2717.9 472.286L2927.81 0ZM1245.82 410.347L1276.32 277.656H330.85L153.929 410.347H1245.82ZM1229.16 482.83H100.972L251.134 820.694H813.449L722.26 2188.52H837.043L1229.16 482.83ZM1350.7 277.656L911.417 2188.52H1023.87L1662.19 615.52H2301.36L2451.52 277.656H1350.7ZM1460.19 205.173H2497.79L2733.69 72.4829H1696.09L1460.19 205.173Z" fill="#ffffff"></path>
+        </svg>
+
+        <div>tutorial</div>
+        <button type="button" onclick="refresh()" id="start" class="-delay">Start</button>
+      </div>
+    </div>
+
+    <div class="dialog-container closed-dialog">
+      <div class="shade"></div>
+      <div class="intro">
+        <div class="message">Session ended.</div>
+        <button type="button" onclick="refresh()">Restart</button>
+      </div>
+    </div>
+
+    <div id="terminal" class="textual-terminal" data-session-websocket-url="wss://textual-web.io/textualize/tutorial/ws" data-font-size="12"><div dir="ltr" class="terminal xterm"><div class="xterm-viewport" style="background-color: rgb(0, 0, 0);"><div class="xterm-scroll-area" style="height: 493px;"></div></div><div class="xterm-screen" style="width: 889px; height: 493px;"><div class="xterm-helpers"><textarea class="xterm-helper-textarea" aria-label="Terminal input" aria-multiline="false" autocorrect="off" autocapitalize="none" spellcheck="false" tabindex="0"></textarea><div class="composition-view"></div></div><canvas class="xterm-text-layer" style="z-index: 0; width: 889px; height: 493px;" width="1778" height="986"></canvas><canvas class="xterm-selection-layer" style="z-index: 1; width: 889px; height: 493px;" width="1778" height="986"></canvas><canvas class="xterm-link-layer" style="z-index: 2; width: 889px; height: 493px;" width="1778" height="986"></canvas><canvas class="xterm-cursor-layer" style="z-index: 3; width: 889px; height: 493px;" width="1778" height="986"></canvas><div class="xterm-decoration-container"></div></div></div></div>
+  
+</body></html>

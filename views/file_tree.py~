@@ -1,0 +1,125 @@
+"""
+File tree widget for Claudius.
+Renders the file tree with appropriate styling.
+"""
+from rich.console import RenderableType
+from rich.text import Text
+from rich.tree import Tree
+from textual.widget import Widget
+
+from ..models.state import AppState
+from ..utils.calculations import get_display_name
+
+
+class FileTree(Widget):
+    """Widget for displaying the file tree."""
+
+    DEFAULT_CSS = """
+    FileTree {
+        width: 1fr;
+        height: 1fr;
+        overflow: auto;
+    }
+    """
+
+    def __init__(self, name: str = None) -> None:
+        super().__init__(name=name)
+        self.state = None
+
+    def update_from_state(self, state: AppState) -> None:
+        """
+        Update view from app state.
+
+        Args:
+            state: Current application state
+        """
+        self.state = state
+        self.refresh()
+
+    def render(self) -> RenderableType:
+        """
+        Render the file tree.
+
+        Returns:
+            Rich renderable
+        """
+        if not self.state:
+            return Text("Loading...")
+
+        # Start with a root tree
+        # Sci-fi blue color for tree guides
+        tree = Tree("📁 .", guide_style="#173a6c")
+
+        # Build a nested tree structure from the flat edges
+        self._build_tree(tree, "", 0)
+
+        return tree
+
+    def _build_tree(self, tree, current_path, level):
+        """
+        Recursively build the tree structure.
+
+        Args:
+            tree: The current tree node
+            current_path: The current path being processed
+            level: The current indentation level
+        """
+        # Skip if not visible (parent folder not expanded)
+        if level > 0 and (not current_path or current_path not in self.state.expanded_folders):
+            return
+
+        # Add children
+        for child in self.state.edges.get(current_path, []):
+            is_folder = child in self.state.folders
+            is_included = child in self.state.included_paths
+            is_selected = child == self.state.selected_item
+            is_expanded = child in self.state.expanded_folders
+
+            # Determine icon with sci-fi styling
+            if is_folder:
+                if is_expanded:
+                    icon = "🔹 "  # Sci-fi open folder icon
+                else:
+                    icon = "🔸 "  # Sci-fi closed folder icon
+            else:
+                icon = "📄 "  # File icon
+
+            # Create display text
+            display_name = get_display_name(child)
+
+            # Create text with styling applied
+            # The order of styling is important - selected should override other styles
+            text = Text()
+
+            # Start with basic styling
+            if is_selected:
+                text.append(f"{icon}{display_name}")
+                # Apply selected class to the entire text
+                text.stylize("selected", 0, len(text))
+            else:
+                text.append(f"{icon}{display_name}")
+                text.stylize("tree-item", 0, len(text))
+
+                # Additional styling for different types
+                if is_folder:
+                    text.stylize("folder-icon", 0, len(icon))
+                    if is_expanded:
+                        text.stylize("expanded-folder", 0, len(text))
+                else:
+                    text.stylize("file-icon", 0, len(icon))
+
+                # Included styling
+                if is_included:
+                    text.stylize("included", 0, len(text))
+                    text.stylize("glow-success", 0, len(text))
+
+            # Add keyline effect to items at level 1
+            if level == 1:
+                text.stylize("keyline", 0, len(text))
+
+            # Add to tree
+            child_tree = tree.add(text)
+
+            # Recursively add children if it's a folder
+            if is_folder:
+                self._build_tree(child_tree, child, level + 1)

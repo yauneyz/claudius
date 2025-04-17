@@ -1,0 +1,45 @@
+/* Main app styles */
+Screen {
+    background: $surface;
+    color: $text;
+}
+
+#main {
+    width: 1fr;
+    height: 1fr;
+    border: none;
+}
+
+/* File tree styling */
+FileTree {
+    width: 1fr;
+    height: 1fr;
+    overflow: auto;
+}
+
+/* Status bar styling */
+StatusBar {
+    dock: bottom;
+    height: 1;
+    background: $surface;
+    color: $text;
+    padding: 0 1;
+}
+
+StatusBar.notification {
+    background: $success;
+    color: $text;
+    text-style: bold;
+}
+
+/* Item styling for included files */
+.included {
+    color: $success;
+    text-style: bold;
+}
+
+/* Item styling for selected items */
+.selected {
+    background: $accent;
+    color: $text;
+}

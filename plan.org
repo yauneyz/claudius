@@ -1,0 +1,36 @@
+We want to create a terminal GUI app using Textual, the Python library.
+
+We are going to use a functional programming style, where we have state, data, calculations (pure functions), and actions (functions that have side effects like reading data or mutating state)
+
+The goal of the app is to allow users to manage their ".claudeignore" file. The app will recursively scan the user's file system, with the root being the current working directory.
+
+We will display a file tree, with more deeply nested files indented more. Files and folders will have different icons, set using font-awesome if possible. Each item will be on a different line
+
+Files that are to be included in .claudeignore (or that are already included, based on our inital loading from the existing file) will have an "included" style to visually distinguish them.
+
+
+This is the state we will track:
+
+- which items are included; this includes both files and folders. If a folder is included, we include all of its children, recursively. This is a set of filepaths
+- an "edges" dictionary. We map files to their children. This lets us reconstruct the file tree while maintaining a flat list of items.
+- a set that tracks which items are folders. When we want to know if something is a folder or file, we check if the filepath is contained in this set
+- the item that is currently "selected" whose line will be highlighted in the UI
+- which folders are expanded. This is a set of expanded folders. So it is always going to be a subset of the list of folders
+
+Here are the actions we will support:
+- w will write all the currently selected files to .claudeignore, one on each line
+- j will move the selected file index vertically down one
+- k will move the selected file index vertically up one
+- tab will toggle the selected folder's expansion level
+- o will expand all folders by copying the list of folders to the list of expanded folders
+- p will collapse all folders by emptying the list of expanded folders
+
+Here are some calculations (pure functions) we should probably have:
+- take the list of items and the edges tree and return an actual tree (nested lists) that we can traverse to draw the filetree. The items are dicts that map the filepath to the properties, such as whether it is a file/folder, whether it is included in the ignore file, and whether it is "selected." The filepath that we put in here will not include its parents. If we have foo/ and foo/bar.cljs then when displaying bar.cljs we would have the path bar.cljs because the "foo" folder will be implied by the tree structure. We can break this down into sub-calculations to make it easy. For example, one calculation would be getting the filepath after removing the parents.
+- increment or decrement the selected index, including wrap-around
+- taking the list of expanded folders and a folder path and then toggling it
+- take the list of items and return a list of absolute filepaths, relative to the current root. This will work for exporting to claude
+
+On loading we will open the current .claudeignore file and initialize our "included" state
+
+Analyze this plan and point out any gaps. What am I missing? How can this be more elegant?

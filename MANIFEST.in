@@ -1,0 +1,4 @@
+include claudius/views/claudius.css
+include README.md
+include LICENSE
+include requirements.txt

@@ -3,6 +3,7 @@ Main application class for Claudius.
 Handles the app lifecycle and user input.
 """
 import os
+import pkg_resources
 import asyncio
 from textual.app import App, ComposeResult
 from textual.widgets import Header, Footer
@@ -22,7 +23,8 @@ class ClaudiusApp(App):
 
     ENABLE_DEVTOOLS = True
 
-    CSS_PATH = "claudius.css"
+    CSS_PATH = pkg_resources.resource_filename(
+        "claudius.views", "claudius.css")
 
     BINDINGS = [
         ("j", "move_down", "Move Down"),

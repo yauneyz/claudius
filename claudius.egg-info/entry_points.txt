@@ -1,0 +1,2 @@
+[console_scripts]
+claudius = claudius.main:main

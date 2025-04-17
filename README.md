@@ -4,7 +4,7 @@ A terminal-based UI for managing `.claudeignore` files.
 
 ## Overview
 
-Claudius is a command-line tool that provides a visual interface for managing `.claudeignore` files. It allows you to easily specify which files and directories should be excluded when sharing content with Claude AI. This helps you maintain privacy by ensuring sensitive files aren't inadvertently shared during conversations with Claude.
+Claudius is a command-line tool that provides a visual interface for managing `.claudeignore` files. It allows you to easily specify which files and directories should be excluded when sharing content with Claude AI. As projects grow in size, eventually you can't fit the entire codebase into the context window. This helps you easily manage which files get included
 
 The app scans your file system recursively from the current working directory and displays files in a tree structure, making it easy to see which files are included in your `.claudeignore` file and to add or remove entries quickly.
 
@@ -61,12 +61,6 @@ Claudius uses a functional programming approach with clear separation between:
 - **State management**: Tracks which files are included, folder expansion status, and selection
 - **Actions**: Functions that have side effects (reading files, updating UI)
 - **Calculations**: Pure functions for filtering and transforming data
-
-## Why Use Claudius?
-
-When working with Claude AI, you might want to share code or project directories while keeping certain files private. The `.claudeignore` file lets you specify which files and directories should be excluded, similar to how `.gitignore` works for Git.
-
-Claudius makes managing these ignore patterns easy through a visual interface rather than manually editing the file.
 
 ## Contributing
 
